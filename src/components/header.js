@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { ShoppingCart, LogOut, LogIn } from "lucide-react";
 import { useDispatch } from "react-redux";
-import { logout } from "../reduxfeatures/login/authSliceReducer";
+import { logout } from "../reduxfeatures/loginslice/authReducer";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "./header.css";

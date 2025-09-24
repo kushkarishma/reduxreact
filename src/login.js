@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { loginUser } from "./reduxfeatures/login/auth-action";
+import { loginUser } from "./reduxfeatures/loginslice/auth-action";
 import { toast, ToastContainer } from "react-toastify";
 
 function Login() {

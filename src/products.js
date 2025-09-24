@@ -2,63 +2,53 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import QuantitySelector from "./components/quantityselector";
-import { getBackendData } from "./api/api-service";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchProducts } from "./reduxfeatures/productsslice/product-action";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 function Products() {
-  const [allProducts, setAllProducts] = useState([]); 
-  const [products, setProducts] = useState([]);       
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [categories, setCategories] = useState(["All"]);s
-  let [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const limit = 6;
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  // Redux state
+  const { product: allProducts, loading, error } = useSelector((state) => state.products);
+
+
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [categories, setCategories] = useState(["All"]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 10;
+
+
   useEffect(() => {
-    getProducts();
-  }, []);
+    dispatch(fetchProducts());
+  }, [dispatch]);
+
 
   useEffect(() => {
-    filterProducts();
-  }, [selectedCategory, page]);
-
-  const getProducts = async () => {
-    try {
-      const result = await getBackendData("products");
-      if (!result || result.length === 0) {
-        setAllProducts([]);
-        setTotalPages(1);
-        setProducts([]);
-        setCategories(["All"]);
-        return;
-      }
-      setAllProducts(result);
-      setTotalPages(Math.ceil(result.length / limit));
-      setProducts(result.slice(0, limit));
-
-
-      const uniqueCategories = ["All", ...new Set(result.map((p) => p.category))];
+    if (allProducts.length > 0) {
+      const uniqueCategories = ["All", ...new Set(allProducts.map((p) => p.category))];
       setCategories(uniqueCategories);
-    } catch (error) {
-      console.error("Error fetching products:", error);
     }
-  };
+  }, [allProducts]);
 
-  const filterProducts = () => {
-    let filtered =
-      selectedCategory === "All"
-        ? allProducts
-        : allProducts.filter((p) => p.category === selectedCategory);
+
+  useEffect(() => {
+    let filtered = selectedCategory === "All"
+      ? allProducts
+      : allProducts.filter((p) => p.category === selectedCategory);
 
     setTotalPages(Math.ceil(filtered.length / limit));
 
     const start = (page - 1) * limit;
     const end = start + limit;
-    setProducts(filtered.slice(start, end));
-  };
+    setFilteredProducts(filtered.slice(start, end));
+  }, [allProducts, selectedCategory, page]);
 
+  // Cart functions
   const handleAddToCart = (product) => {
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
     cart.push(product);
@@ -70,13 +60,15 @@ function Products() {
     navigate("/addtocart");
   };
 
+  if (loading) return <p className="text-center mt-5">Loading products...</p>;
+  if (error) return <p className="text-center mt-5 text-danger">{error}</p>;
+
   return (
     <section className="products-page py-5" style={{ backgroundColor: "#fff5f5" }}>
       <div className="container">
         <h2 className="text-center mb-5 fw-bold" style={{ color: "#d6336c" }}>
           Products Collection
         </h2>
-
 
 
         <div className="mb-5 text-center d-flex justify-content-center">
@@ -96,10 +88,9 @@ function Products() {
           </select>
         </div>
 
-
-
+        {/* Product Cards */}
         <div className="row g-4">
-          {products.map((product) => (
+          {filteredProducts.map((product) => (
             <div className="col-lg-3 col-md-4 col-sm-6" key={product.id}>
               <div className="card h-100 product-card shadow-sm border-0">
                 <div className="overflow-hidden" style={{ height: "180px" }}>
@@ -125,14 +116,11 @@ function Products() {
                   <QuantitySelector
                     initial={product.quantity || 1}
                     onChange={(newQty) => {
-                      const updatedProducts = products.map((p) =>
+
+                      const updated = filteredProducts.map((p) =>
                         p.id === product.id ? { ...p, quantity: newQty } : p
                       );
-                      setProducts(updatedProducts);
-                      const updatedAllProducts = allProducts.map((p) =>
-                        p.id === product.id ? { ...p, quantity: newQty } : p
-                      );
-                      setAllProducts(updatedAllProducts);
+                      setFilteredProducts(updated);
                     }}
                   />
 
@@ -154,7 +142,7 @@ function Products() {
           ))}
         </div>
 
-
+        {/* Pagination */}
         <div className="d-flex justify-content-center align-items-center gap-3 mt-5">
           <button
             onClick={() => { if (page > 1) setPage(page - 1); }}
