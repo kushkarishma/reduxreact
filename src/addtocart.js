@@ -24,13 +24,13 @@ function AddToCart() {
         localStorage.setItem("cart", JSON.stringify(updatedCart));
 
     };
-    debugger
+   
 
 
     const handleRemove = (id) => {
         const updatedCart = cart.filter((item) => item.id !== id);
         setCart(updatedCart);
-        debugger
+       
         localStorage.setItem("cart", JSON.stringify(updatedCart));
         toast.error("Item removed from cart!");
     };

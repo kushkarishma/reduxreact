@@ -13,7 +13,7 @@ function Profile() {
 
   const getUser = async () => {
     try {
-      const data = await getBackendData("users/profile");
+      const data = await getBackendData("user/profile");
       setUser(data);
       setFormData({ name: data.name, email: data.email });
       if (data.galleryImages) setGalleryImages(data.galleryImages);
@@ -65,7 +65,7 @@ function Profile() {
     if (img.id) {
       debugger
       try {
-        await deleteBackendData(`users/gallery/${img.id}`);
+        await deleteBackendData(`user/gallery/${img.id}`);
         setGalleryImages((prev) => prev.filter((i) => i.id !== img.id));
       } catch (err) {
         console.error("Error deleting image:", err);
@@ -88,7 +88,7 @@ function Profile() {
         galleryImages: JSON.stringify(galleryImages),
       };
 
-      const updatedUser = await putBackendData("users/profile", payload);
+      const updatedUser = await putBackendData("user/profile", payload);
 
      
       setGalleryImages(updatedUser.user.galleryImages);

@@ -93,6 +93,7 @@ function App() {
         </Route>
 
         {/* public-----------------------------------------------------------------------------*/}
+        <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
         <Route path="/products" element={<Products />} />
         <Route path="*" element={<NotFoundPage />} />
